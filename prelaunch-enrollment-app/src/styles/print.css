@@ -78,4 +78,76 @@
     .page-break {
         page-break-before: always;
     }
+
+    /* Hide non-printable elements */
+    .no-print {
+        display: none !important;
+    }
+
+    /* Print container styles */
+    .print-container {
+        padding: 20px;
+        margin: 0;
+        background: white;
+    }
+
+    /* Table styles for printing */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f5f5f5;
+    }
+
+    /* Text styles */
+    h1, h2, h3, h4, h5, h6 {
+        color: #000;
+        margin-bottom: 1em;
+    }
+
+    /* Page breaks */
+    .page-break {
+        page-break-before: always;
+    }
+
+    /* Links */
+    a {
+        text-decoration: none;
+    }
+
+    /* Images */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* Margins and padding */
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Font sizes */
+    body {
+        font-size: 12pt;
+        line-height: 1.5;
+    }
+
+    /* Colors */
+    * {
+        color: #000 !important;
+    }
+
+    /* Background colors */
+    * {
+        background-color: transparent !important;
+    }
 } 

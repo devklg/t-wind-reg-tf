@@ -71,7 +71,8 @@ const enrollmentSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ['Credit Card', 'Bank Transfer']
+    enum: ['Credit Card', 'Bank Transfer'],
+    required: false
   },
 
   // Status and Timestamps
@@ -115,18 +116,20 @@ const enrollmentSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Pre-save hook to generate sequential ID
-enrollmentSchema.pre('save', async function(next) {
+// Pre-validate hook to generate sequential ID
+enrollmentSchema.pre('validate', async function(next) {
   if (this.isNew) {
     try {
       // Get the latest enrollment to determine the next number
       const latestEnrollment = await this.constructor.findOne({}, {}, { sort: { 'enrollmentId': -1 } });
       let nextNumber = 1000;
       
-      if (latestEnrollment) {
+      if (latestEnrollment && latestEnrollment.enrollmentId) {
         // Extract the number from the latest enrollmentId (PL-XXXX)
-        const lastNumber = parseInt(latestEnrollment.enrollmentId.split('-')[1]);
-        nextNumber = lastNumber + 1;
+        const match = latestEnrollment.enrollmentId.match(/PL-(\d+)/);
+        if (match) {
+          nextNumber = parseInt(match[1]) + 1;
+        }
       }
       
       // Generate the new enrollmentId
@@ -134,31 +137,39 @@ enrollmentSchema.pre('save', async function(next) {
       
       // Set the enrollment date to the current timestamp
       this.enrollmentDate = new Date();
+    } catch (error) {
+      console.error('Error in pre-validate hook:', error);
+      next(error);
+      return;
+    }
+  }
+  next();
+});
 
-      // If there's a sponsor name, try to find their enrollment ID
-      if (this.sponsorName) {
-        // Split the sponsor name into first and last name
-        const nameParts = this.sponsorName.trim().split(' ');
-        const firstName = nameParts[0];
-        const lastName = nameParts.slice(1).join(' ');
+// Pre-save hook to handle sponsor lookup
+enrollmentSchema.pre('save', async function(next) {
+  if (this.isNew && this.sponsorName) {
+    try {
+      const sponsorName = this.sponsorName.trim();
+      if (sponsorName) {
+        const nameParts = sponsorName.split(' ');
+        if (nameParts.length >= 2) {
+          const firstName = nameParts[0];
+          const lastName = nameParts.slice(1).join(' ');
 
-        // Try to find the sponsor by first and last name
-        const sponsor = await this.constructor.findOne({
-          firstName: { $regex: new RegExp(`^${firstName}$`, 'i') },
-          lastName: { $regex: new RegExp(`^${lastName}$`, 'i') }
-        });
+          const sponsor = await this.constructor.findOne({
+            firstName: { $regex: new RegExp(`^${firstName}$`, 'i') },
+            lastName: { $regex: new RegExp(`^${lastName}$`, 'i') }
+          });
 
-        if (sponsor) {
-          this.sponsorId = sponsor.enrollmentId;
-          console.log(`Found sponsor: ${sponsor.enrollmentId} for ${this.sponsorName}`);
-        } else {
-          console.log(`No sponsor found for: ${this.sponsorName}`);
+          if (sponsor) {
+            this.sponsorId = sponsor.enrollmentId;
+            console.log(`Found sponsor: ${sponsor.enrollmentId} for ${sponsorName}`);
+          }
         }
       }
     } catch (error) {
-      console.error('Error in pre-save hook:', error);
-      next(error);
-      return;
+      console.error('Error in sponsor lookup:', error);
     }
   }
   next();

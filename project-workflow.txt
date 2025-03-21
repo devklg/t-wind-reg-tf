@@ -1,0 +1,128 @@
+ENROLLMENT SYSTEM WORKFLOW AND ROUTES
+====================================
+
+1. PUBLIC ROUTES (No Authentication Required)
+-------------------------------------------
+/ - Home/Enrollment Form
+  ✓ Create new enrollment
+  ✓ Collect personal information
+  ✓ Collect sponsor information
+  ✓ Select package
+  ✓ Submit enrollment
+
+/welcome/:id - Welcome Page
+  ✓ Display enrollment confirmation
+  ✓ Show enrollment details
+  ✓ Show sponsor information
+  ✓ Display next steps
+
+2. PROTECTED ROUTES (Requires Authentication)
+-------------------------------------------
+/login - Login Page
+  ✓ Email/password authentication
+  ✓ Role-based redirection
+  ✓ Token storage
+
+/profile/:id - User Profile
+  ✓ View personal information
+  ✓ Edit profile details
+  ✓ View enrollment status
+  ✓ View package information
+
+/admin - Admin Dashboard
+  ✓ View all enrollments
+  ✓ Filter enrollments
+  ✓ Update enrollment status
+  ✓ Delete enrollments
+  ✓ Print enrollment details
+  ✓ Print enrollment list
+
+3. API ENDPOINTS
+---------------
+Authentication:
+  ✓ POST /api/auth/login
+  ✓ JWT token generation
+  ✓ Role-based access
+
+Enrollment Management:
+  ✓ POST /api/enrollments - Create new enrollment
+  ✓ GET /api/enrollments - Get all enrollments
+  ✓ GET /api/enrollments/:id - Get single enrollment
+  ✓ PUT /api/enrollments/:id - Update enrollment
+  ✓ PATCH /api/enrollments/:id/status - Update status
+  ✓ DELETE /api/enrollments/:id - Delete enrollment
+
+4. FEATURES IMPLEMENTED
+----------------------
+User Authentication:
+  ✓ Login functionality
+  ✓ Role-based access control
+  ✓ Protected routes
+
+Enrollment System:
+  ✓ Sequential enrollment ID generation
+  ✓ Sponsor/enroller linking
+  ✓ Package selection
+  ✓ Status management
+
+Admin Features:
+  ✓ View all enrollments
+  ✓ Filter and search
+  ✓ Status updates
+  ✓ Enrollment deletion
+  ✓ Print functionality
+
+Profile Management:
+  ✓ View profile details
+  ✓ Edit personal information
+  ✓ View enrollment status
+  ✓ View package details
+
+Print Functionality:
+  ✓ Individual enrollment printing
+  ✓ List view printing
+  ✓ Custom print styles
+  ✓ Print-friendly formatting
+
+5. SECURITY FEATURES
+-------------------
+✓ JWT Authentication
+✓ Protected Routes
+✓ Role-based Access Control
+✓ Secure Password Handling
+✓ CORS Configuration
+
+6. UI/UX FEATURES
+----------------
+✓ Responsive Design
+✓ Loading States
+✓ Error Handling
+✓ Toast Notifications
+✓ Form Validation
+✓ Print-friendly Layouts
+
+7. DATA MANAGEMENT
+-----------------
+✓ MongoDB Integration
+✓ Mongoose Models
+✓ Data Validation
+✓ Error Handling
+✓ API Error Responses
+
+8. ADDITIONAL FEATURES
+---------------------
+✓ Dynamic Port Configuration
+✓ Health Check Endpoint
+✓ API Service Layer
+✓ Print Styles
+✓ Notification System
+
+CURRENT LIMITATIONS/TO-DO
+------------------------
+1. Password reset functionality
+2. Email verification
+3. Profile picture upload
+4. Advanced search filter
+
+====================================
+Last Updated: [Current Date] 

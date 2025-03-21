@@ -1,28 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
-import Notification from './Notification';
+import { apiService } from '../services/api';
+import { toast } from 'react-toastify';
 
 const Welcome = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
-    const [notification, setNotification] = useState(null);
     const [enrollment, setEnrollment] = useState(null);
 
     useEffect(() => {
         const fetchEnrollment = async () => {
             try {
-                const data = await api.getEnrollment(id);
+                const data = await apiService.getEnrollment(id);
                 setEnrollment(data);
             } catch (error) {
+                console.error('Error fetching enrollment:', error);
                 if (error.response?.status === 401) {
-                    navigate('/');
+                    // If unauthorized, redirect to login
+                    navigate('/login');
                 } else {
-                    setNotification({
-                        type: 'error',
-                        message: 'Failed to load enrollment data'
-                    });
+                    toast.error('Failed to load enrollment details');
                 }
             } finally {
                 setLoading(false);
@@ -34,7 +32,7 @@ const Welcome = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center min-h-screen">
+            <div className="min-h-screen flex items-center justify-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
             </div>
         );
@@ -42,71 +40,84 @@ const Welcome = () => {
 
     if (!enrollment) {
         return (
-            <div className="max-w-4xl mx-auto p-6">
-                <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                    <p className="text-red-700">Enrollment not found</p>
-                </div>
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-red-500">Enrollment not found</div>
             </div>
         );
     }
 
     return (
-        <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
-            <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-gray-800 mb-4">Welcome to Talk Fusion!</h1>
-                <p className="text-xl text-gray-600">Thank you for joining our community</p>
-            </div>
+        <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl mx-auto">
+                <div className="bg-white shadow rounded-lg p-6">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Welcome to Your Enrollment!</h2>
 
-            {notification && (
-                <Notification
-                    type={notification.type}
-                    message={notification.message}
-                    onClose={() => setNotification(null)}
-                />
-            )}
+                    <div className="space-y-6">
+                        <section>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Enrollment Details</h3>
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-500">Enrollment ID</p>
+                                    <p className="mt-1 text-sm text-gray-900">{enrollment.enrollmentId}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-gray-500">Name</p>
+                                    <p className="mt-1 text-sm text-gray-900">{`${enrollment.firstName} ${enrollment.lastName}`}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-gray-500">Package</p>
+                                    <p className="mt-1 text-sm text-gray-900">{enrollment.package}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-gray-500">Enrollment Date</p>
+                                    <p className="mt-1 text-sm text-gray-900">
+                                        {new Date(enrollment.enrollmentDate).toLocaleDateString()}
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-                <h2 className="text-xl font-semibold text-blue-800 mb-4">Your Enrollment Details</h2>
-                <div className="space-y-2">
-                    <p><span className="font-medium">Enrollment ID:</span> {enrollment.enrollmentId}</p>
-                    <p><span className="font-medium">Name:</span> {enrollment.firstName} {enrollment.lastName}</p>
-                    <p><span className="font-medium">Package:</span> {enrollment.package}</p>
-                    <p><span className="font-medium">Enrollment Date:</span> {new Date(enrollment.enrollmentDate).toLocaleString()}</p>
+                        <section>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Sponsor Information</h3>
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-500">Sponsor Name</p>
+                                    <p className="mt-1 text-sm text-gray-900">{enrollment.sponsorName}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-gray-500">Sponsor ID</p>
+                                    <p className="mt-1 text-sm text-gray-900">
+                                        {enrollment.sponsorId || 'Not available'}
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Next Steps</h3>
+                            <div className="space-y-4">
+                                <p className="text-sm text-gray-600">
+                                    Thank you for enrolling! Here are your next steps:
+                                </p>
+                                <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600">
+                                    <li>Complete your profile information</li>
+                                    <li>Review your package benefits</li>
+                                    <li>Set up your payment method</li>
+                                    <li>Start your training program</li>
+                                </ol>
+                            </div>
+                        </section>
+
+                        <div className="flex justify-end">
+                            <button
+                                onClick={() => navigate(`/profile/${id}`)}
+                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                            >
+                                Go to Profile
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-8">
-                <h2 className="text-xl font-semibold text-purple-800 mb-4">Your Enroller Information</h2>
-                <div className="space-y-2">
-                    <p><span className="font-medium">Enroller Name:</span> {enrollment.sponsorName}</p>
-                    <p>
-                        <span className="font-medium">Enroller ID:</span>{' '}
-                        {enrollment.sponsorId ? (
-                            <span className="text-purple-700">{enrollment.sponsorId}</span>
-                        ) : (
-                            <span className="text-yellow-600 italic">Enroller not found in system</span>
-                        )}
-                    </p>
-                </div>
-            </div>
-
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                <h2 className="text-xl font-semibold text-green-800 mb-4">Next Steps</h2>
-                <ul className="list-disc list-inside space-y-2 text-green-700">
-                    <li>Review your enrollment details above</li>
-                    <li>Check your email for additional information</li>
-                    <li>Connect with your sponsor for guidance</li>
-                    <li>Access your training materials</li>
-                </ul>
-            </div>
-
-            <div className="mt-8 text-center">
-                <button
-                    onClick={() => navigate(`/profile/${id}`)}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                >
-                    View Your Profile
-                </button>
             </div>
         </div>
     );

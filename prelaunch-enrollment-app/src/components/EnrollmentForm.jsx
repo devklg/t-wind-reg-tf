@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { toast } from 'react-toastify';
 import Notification from './Notification';
 
 const EnrollmentForm = () => {
@@ -11,9 +12,16 @@ const EnrollmentForm = () => {
         firstName: '',
         lastName: '',
         email: '',
+        phone: '',
+        address: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: '',
         sponsorName: '',
-        package: '',
+        package: ''
     });
+    const [error, setError] = useState(null);
 
     const packages = [
         {
@@ -77,16 +85,45 @@ const EnrollmentForm = () => {
         setLoading(true);
 
         try {
+            console.log('Creating enrollment with data:', formData);
             const response = await api.createEnrollment(formData);
-            setNotification({
-                type: 'success',
-                message: 'Enrollment submitted successfully!'
+            console.log('Enrollment creation response:', response);
+
+            if (!response || !response.data) {
+                throw new Error('Invalid response from server');
+            }
+
+            const { token, enrollment, temporaryPassword } = response.data;
+
+            // Store auth data
+            localStorage.setItem('token', token);
+            localStorage.setItem('userRole', enrollment.role || 'user');
+            localStorage.setItem('userId', enrollment._id);
+            localStorage.setItem('user', JSON.stringify({
+                id: enrollment._id,
+                email: enrollment.email,
+                firstName: enrollment.firstName,
+                lastName: enrollment.lastName,
+                role: enrollment.role || 'user'
+            }));
+
+            // Show success message with temporary password
+            toast.success(`Enrollment successful! Your temporary password is: ${temporaryPassword}`, {
+                position: 'top-center',
+                autoClose: 5000
             });
-            navigate(`/profile/${response.enrollment._id}`);
+
+            // Wait for toast to show before redirecting
+            setTimeout(() => {
+                navigate(`/profile/${enrollment._id}`);
+            }, 5000);
+
         } catch (error) {
-            setNotification({
-                type: 'error',
-                message: error.message || 'Failed to submit enrollment'
+            console.error('Enrollment creation error:', error);
+            const errorMessage = error.response?.data?.message || error.message || 'Failed to create enrollment';
+            toast.error(errorMessage, {
+                position: 'top-center',
+                autoClose: 5000
             });
         } finally {
             setLoading(false);
